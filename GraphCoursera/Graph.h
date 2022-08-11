@@ -12,14 +12,16 @@ public:
     // A constructor that builds a graph according to the given parameters of the number of
     // vertices, density and range
     Graph(T1 V, T2 density, T2 dnLim, T2 upLim) : V(V), adjacencyList(new list<pair<T1, T2> >[V]) {
+        if (dnLim > upLim) swap(dnLim, upLim);
         for (T1 i = 0; i < V; i++)
-            for (T1 e = 0; e < V * density; e++)
+            for (T1 e = 0; e < V * min(T2(1), max(T2(0), density)); e++)
                 addEdge(i, rand() % V, drand(dnLim, upLim));
     }
     ~Graph() { delete[] adjacencyList; }
 
     // Add an edge in an undirected graph
     void addEdge(T1 u, T1 v, T2 weight) {
+        if (u == v) return; // no loops in this graph
         adjacencyList[u].push_back(make_pair(v, weight));
         adjacencyList[v].push_back(make_pair(u, weight));
     }
@@ -45,6 +47,7 @@ public:
 
     // Typical representation of Dijkstra's algorithm
     T2** dijkstra(T1 source) {
+        source %= V;
         T2* dist = new T2[V], * prev = new T2[V];
         bool* visited = new bool[V];
         for (T1 i = 0; i < V; i++) {

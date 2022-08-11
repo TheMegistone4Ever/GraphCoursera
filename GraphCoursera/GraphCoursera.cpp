@@ -5,11 +5,11 @@
 #include "Graph.h"
 int main(int argc, char const* argv[]) {
     srand(static_cast<unsigned int>(time(nullptr)));
-    int V; cout << "Input V: "; cin >> V;
-    double density; cout << "Input density: "; cin >> density;
-    double dnLim; cout << "Input dnLim: "; cin >> dnLim;
-    double upLim; cout << "Input upLim: "; cin >> upLim;
-    int source; cout << "Input source vertice: "; cin >> source;
+    int V; cout << "Input V: "; cin >> V; if (V < 0) V = abs(V);
+    double density; cout << "Input density (from 0 to 1): "; cin >> density;
+    double dnLim; cout << "Input dnLim for random: "; cin >> dnLim;
+    double upLim; cout << "Input upLim for random: "; cin >> upLim;
+    int source; cout << "Input source vertice (from 0 to " << V - 1 << "): "; cin >> source;
     Graph<int, double> graph(V, density, dnLim, upLim);
     // Set graph for manual processing
     /*graph.addEdge(0, 1, 2);
