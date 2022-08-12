@@ -34,10 +34,11 @@ public:
 
     // Print the adjacency list representation of graph
     void printAdjacencyList() {
+        T1 w = static_cast<T1>(log10(V)) + 1;
         for (T1 v = 0; v < V; v++) {
-            cout << "Vertex " << v << ':';
+            cout << "Vertex " << setw(w) << v << ':';
             for (const pair<T1, T2>& p : adjacencyList[v])
-                cout << " -> " << setw(2) << p.first << ":w=" << setprecision(3) << p.second;
+                cout << " -> " << setw(w) << p.first << ":w=" << fixed << setprecision(3) << p.second;
             cout << endl;
         }
     }
@@ -81,6 +82,14 @@ public:
         for (T1 i = 0; i < V; i++) if (arr[1][i] < 0) return false;
         return true;
     }
+
+    list<pair<T1, T2> > STP() {
+
+
+
+        return nullptr;
+    }
+
 };
 
 // The function of calculating the arithmetic mean of only positive numbers not equal
