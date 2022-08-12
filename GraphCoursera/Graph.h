@@ -36,7 +36,7 @@ public:
             for (T1 e = 0; e < V * min(T2(1), max(T2(0), density)); e++)
                 addEdge(i, T1(rand() % V), drand(dnLim, upLim));
     }
-    ~Graph() { delete[] adjacencyList; }
+    ~Graph() { /*Here the std::list destructor is called for everything automatically*/ }
 
     // Add an edge in an undirected graph, return true if edge was added succesfully
     bool addEdge(T1 u, T1 v, T2 weight) {
@@ -105,6 +105,7 @@ public:
 
     // Function to build minimum spanning forest (Kruskal's)
     Graph kruskalSTP(T2& weightSTP) {
+        if (!isFullyConnected()) return Graph();
         Graph stp(V);
         DisjointSets ds(V);
         edges.sort(); // Iterate through all sorted edges
