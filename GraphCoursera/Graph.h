@@ -15,15 +15,21 @@ public:
         if (dnLim > upLim) swap(dnLim, upLim);
         for (T1 i = 0; i < V; i++)
             for (T1 e = 0; e < V * min(T2(1), max(T2(0), density)); e++)
-                addEdge(i, rand() % V, drand(dnLim, upLim));
+                addEdge(i, T1(rand() % V), drand(dnLim, upLim));
     }
     ~Graph() { delete[] adjacencyList; }
 
-    // Add an edge in an undirected graph
-    void addEdge(T1 u, T1 v, T2 weight) {
-        if (u == v) return; // no loops in this graph
+    // Add an edge in an undirected graph, return true if edge was added succesfully
+    bool addEdge(T1 u, T1 v, T2 weight) {
+        if (u == v) return false; // No loops in this graph
+
+        // No dublicates in this graph
+        for (list<pair<T1, T2> > ::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
+            if (it->first == v) return false;
+
         adjacencyList[u].push_back(make_pair(v, weight));
         adjacencyList[v].push_back(make_pair(u, weight));
+        return true;
     }
 
     // Print the adjacency list representation of graph
@@ -45,7 +51,7 @@ public:
         return index;
     }
 
-    // Typical representation of Dijkstra's algorithm
+    // Typical representation of Dijkstra's algorithm (breadth)
     T2** dijkstra(T1 source) {
         source %= V;
         T2* dist = new T2[V], * prev = new T2[V];
@@ -67,6 +73,13 @@ public:
                 }
         }
         return new T2 * [2]{ dist, prev };
+    }
+
+    // Checks if a graph is fully connected
+    bool isFullyConnected() {
+        T2** arr = dijkstra(0);
+        for (T1 i = 0; i < V; i++) if (arr[1][i] < 0) return false;
+        return true;
     }
 };
 
