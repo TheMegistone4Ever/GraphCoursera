@@ -28,9 +28,9 @@ int main(int argc, char const* argv[]) {
 
     double weightSTP = 0;
 
-    Graph<int, double> stp = graph.STP(weightSTP);
-    stp.printAdjacencyList();
-    cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightSTP << endl;
+    Graph<int, double> stp = graph.kruskalSTP(weightSTP);
+    /*stp.printAdjacencyList();
+    cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightSTP << endl;*/
 
-    return 0;
+    return EXIT_SUCCESS;
 }

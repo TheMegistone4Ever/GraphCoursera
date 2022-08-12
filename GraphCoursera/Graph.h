@@ -2,12 +2,30 @@
 #include <iostream>
 #include <list>
 #include <iomanip>
+#include <cctype>
 const double INF = 1000000;
 using namespace std;
 inline double drand(double d, double u) { return d + (static_cast<double>(rand()) / RAND_MAX) * (u - d); }
+
+struct DisjointSets {
+    int n, * parent;
+    DisjointSets(int n) {
+        this->n = n;
+        parent = new int[n + 1];
+        for (int i = 0; i <= n; i++) parent[i] = i;
+    }
+
+    // Find and return the parent of a x node
+    inline int find(int x) { return parent[x] != x ? find(parent[x]) : x; }
+
+    // Union two elements
+    inline void merge(int x, int y) { parent[find(y)] = find(x); }
+};
+
 template <class T1, class T2> class Graph {
     T1 V;
     list<pair<T1, T2> >* adjacencyList;
+    list<pair<T2, pair<T1, T1> > > edges;
 public:
     // A constructor that builds a graph according to the given parameters of the number of
     // vertices, density and range
@@ -29,6 +47,7 @@ public:
 
         adjacencyList[u].push_back(make_pair(v, weight));
         adjacencyList[v].push_back(make_pair(u, weight));
+        edges.push_back(make_pair(weight, make_pair(u, v)));
         return true;
     }
 
@@ -84,11 +103,27 @@ public:
     }
 
     // Function to build minimum spanning forest (Kruskal's)
-    Graph STP(T2& weightSTP) {
+    Graph kruskalSTP(T2& weightSTP) {
+        Graph stp(V);
+        DisjointSets ds(V);
+        edges.sort(); // Iterate through all sorted edges
+        for (list<pair<T2, pair<T1, T1> > >::iterator it = edges.begin(); it != edges.end(); it++) {
+            cout << "S EDGES: " << it->first << "/" << it->second.first << "/" << it->second.second << endl;
+        }
+        for (list<pair<T2, pair<T1, T1> > >::iterator it = edges.begin(); it != edges.end(); it++) {
+            int u = it->second.first, v = it->second.second, set_u = ds.find(u), set_v = ds.find(v);
 
-        weightSTP += INF;
-
-        return Graph();
+            // Check if the selected edge is creating a cycle or not
+            if (set_u != set_v) {
+                // Current edge will be in the MST
+                cout << u << " -MST- " << v << endl;
+                stp.addEdge(u, v, it->first);
+                weightSTP += it->first;
+                ds.merge(set_u, set_v);
+            }
+        
+        }
+        return stp;
     }
 
 };
