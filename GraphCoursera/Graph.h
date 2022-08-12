@@ -7,22 +7,23 @@ const double INF = 1000000;
 using namespace std;
 inline double drand(double d, double u) { return d + (static_cast<double>(rand()) / RAND_MAX) * (u - d); }
 
-struct DisjointSets {
-    int n, * parent;
-    DisjointSets(int n) {
-        this->n = n;
-        parent = new int[n + 1];
-        for (int i = 0; i <= n; i++) parent[i] = i;
-    }
-
-    // Find and return the parent of a x node
-    inline int find(int x) { return parent[x] != x ? find(parent[x]) : x; }
-
-    // Union two elements
-    inline void merge(int x, int y) { parent[find(y)] = find(x); }
-};
-
 template <class T1, class T2> class Graph {
+    struct DisjointSets {
+        T1 n, * parent;
+        DisjointSets(T1 n) {
+            this->n = n;
+            parent = new T1[n + 1];
+            for (T1 i = 0; i <= n; i++) parent[i] = i;
+        }
+
+        // Find and return the parent of a x node
+        inline T1 find(T1 x) { return parent[x] != x ? find(parent[x]) : x; }
+
+        // Union two elements
+        inline void merge(T1 x, T1 y) { parent[find(y)] = find(x); }
+    };
+
+
     T1 V;
     list<pair<T1, T2> >* adjacencyList;
     list<pair<T2, pair<T1, T1> > > edges;
@@ -108,10 +109,7 @@ public:
         DisjointSets ds(V);
         edges.sort(); // Iterate through all sorted edges
         for (list<pair<T2, pair<T1, T1> > >::iterator it = edges.begin(); it != edges.end(); it++) {
-            cout << "S EDGES: " << it->first << "/" << it->second.first << "/" << it->second.second << endl;
-        }
-        for (list<pair<T2, pair<T1, T1> > >::iterator it = edges.begin(); it != edges.end(); it++) {
-            int u = it->second.first, v = it->second.second, set_u = ds.find(u), set_v = ds.find(v);
+            T1 u = it->second.first, v = it->second.second, set_u = ds.find(u), set_v = ds.find(v);
 
             // Check if the selected edge is creating a cycle or not
             if (set_u != set_v) {
@@ -125,7 +123,6 @@ public:
         }
         return stp;
     }
-
 };
 
 // The function of calculating the arithmetic mean of only positive numbers not equal
