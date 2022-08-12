@@ -12,7 +12,7 @@ int main(int argc, char const* argv[]) {
     double upLim; cout << "Input upLim for random: "; cin >> upLim;
     int source; cout << "Input source vertice (from 0 to " << V - 1 << "): "; cin >> source;
     Graph<int, double> graph(V, density, dnLim, upLim);
-    graph.printAdjacencyList();
+    //graph.printAdjacencyList();
     //double** dijkstraInfo = graph.dijkstra(source);
     //double avgDist = calcAveragePositiveDistance(dijkstraInfo, V);
 
@@ -25,6 +25,12 @@ int main(int argc, char const* argv[]) {
     //cout << "AVERAGE MIN POSITIVE DISTANCE: " << setprecision(5) << avgDist << endl;
 
     cout << "GRAPH IS FULLY CONNECTED: " << boolalpha << graph.isFullyConnected() << endl;
+
+    double weightSTP = 0;
+
+    Graph<int, double> stp = graph.STP(weightSTP);
+    stp.printAdjacencyList();
+    cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightSTP << endl;
 
     return 0;
 }

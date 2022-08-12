@@ -11,7 +11,7 @@ template <class T1, class T2> class Graph {
 public:
     // A constructor that builds a graph according to the given parameters of the number of
     // vertices, density and range
-    Graph(T1 V, T2 density, T2 dnLim, T2 upLim) : V(V), adjacencyList(new list<pair<T1, T2> >[V]) {
+    Graph(T1 V = 0, T2 density = 0, T2 dnLim = 0, T2 upLim = 0) : V(V), adjacencyList(new list<pair<T1, T2> >[V]) {
         if (dnLim > upLim) swap(dnLim, upLim);
         for (T1 i = 0; i < V; i++)
             for (T1 e = 0; e < V * min(T2(1), max(T2(0), density)); e++)
@@ -24,7 +24,7 @@ public:
         if (u == v) return false; // No loops in this graph
 
         // No dublicates in this graph
-        for (list<pair<T1, T2> > ::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
+        for (list<pair<T1, T2> >::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
             if (it->first == v) return false;
 
         adjacencyList[u].push_back(make_pair(v, weight));
@@ -67,7 +67,7 @@ public:
         for (T1 i = 0; i < V - 1; i++) {
             T1 u = minDistance(dist, visited);
             visited[u] = true;
-            for (list<pair<T1, T2> > ::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
+            for (list<pair<T1, T2> >::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
                 if (!visited[it->first] && dist[u] != INF && dist[it->first] > dist[u] + it->second) {
                     dist[it->first] = dist[u] + it->second;
                     prev[it->first] = u;
@@ -83,11 +83,12 @@ public:
         return true;
     }
 
-    list<pair<T1, T2> > STP() {
+    // Function to build minimum spanning forest (Kruskal's)
+    Graph STP(T2& weightSTP) {
 
+        weightSTP += INF;
 
-
-        return nullptr;
+        return Graph();
     }
 
 };
