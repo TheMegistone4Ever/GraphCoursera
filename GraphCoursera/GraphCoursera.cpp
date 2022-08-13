@@ -13,23 +13,23 @@ int main(int argc, char const* argv[]) {
     int source; cout << "Input source vertice (from 0 to " << V - 1 << "): "; cin >> source;
     Graph<int, double> graph(V, density, dnLim, upLim);
     graph.printAdjacencyList();
-    //double** dijkstraInfo = graph.dijkstra(source);
+    //pair<T2*, T1*> dijkstraInfo = graph.dijkstra(source, );
     //double avgDist = calcAveragePositiveDistance(dijkstraInfo, V);
 
     // The output of all the necessary information obtained during the operation of Dijkstra's algorithm
-    /*for (int i = 0; i < V; i++)
-        cout << source << "\t->\t"
-        << i << "\tMin dist:\t" << setprecision(5) << dijkstraInfo[0][i]
-        << "\tV Prev:\t" << dijkstraInfo[1][i] << endl;*/
+    //for (int i = 0; i < V; i++)
+    //    cout << source << "\t->\t"
+    //    << i << "\tMin dist:\t" << setprecision(5) << dijkstraInfo.first[i]
+    //    << "\tV Prev:\t" << dijkstraInfo.second[i] << endl;
 
     //cout << "AVERAGE MIN POSITIVE DISTANCE: " << setprecision(5) << avgDist << endl;
 
-    cout << "GRAPH IS FULLY CONNECTED: " << boolalpha << graph.isFullyConnected() << endl;
+    cout << "GRAPH IS FULLY CONNECTED: " << boolalpha << graph.isFullyConnected(graph.getAdjacencyList()) << endl;
 
     double weightSTP = 0;
     Graph<int, double> stp = graph.kruskalSTP(weightSTP, 0, 1, 1);
     stp.printAdjacencyList();
     cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightSTP << endl;
-    cout << "STP GRAPH IS FULLY CONNECTED: " << boolalpha << stp.isFullyConnected() << endl;
+    cout << "STP GRAPH IS FULLY CONNECTED: " << boolalpha << stp.isFullyConnected(stp.getAdjacencyList()) << endl;
     return EXIT_SUCCESS;
 }

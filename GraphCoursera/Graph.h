@@ -8,9 +8,10 @@ const double INF = 1000000;
 const int COLORS = 3;
 using namespace std;
 inline double drand(double d, double u) { return d + (static_cast<double>(rand()) / RAND_MAX) * (u - d); }
-enum color {RED, GREEN, BLUE};
 
 template <class T1, class T2> class Graph {
+    enum color { RED, GREEN, BLUE };
+    
     struct DisjointSets {
         T1 size, * parent;
         DisjointSets(T1 size) {
@@ -35,19 +36,22 @@ template <class T1, class T2> class Graph {
     };
 
     T1 V;
-    vector<edge>* adjacencyList;
-    vector<edge> edges, redEdges, greenEdges, blueEdges; // (weight, u, v, color)
+    vector<edge>* adjacencyList, edges, redEdges, greenEdges, blueEdges; // (weight, u, v, color)
 
 public:
+    vector<edge>* getAdjacencyList() { return adjacencyList; }
+
     // A constructor that builds a graph according to the given parameters of the number of
     // vertices, density and range
     Graph(T1 V = 0, T2 density = 0, T2 dnLim = 0, T2 upLim = 0) : V(V), adjacencyList(new vector<edge>[V]) {
         if (dnLim > upLim) swap(dnLim, upLim);
         for (T1 i = 0; i < V; i++)
-            for (T1 e = 0; e < V * min(T2(1), max(T2(0), density)); e++)
-                addEdge({ drand(dnLim, upLim), i, T1(rand() % V), static_cast<color>(rand() % COLORS) });
+            for (T1 e = 0; e < V * min(static_cast<T2>(1), max(static_cast<T2>(0), density)); e++)
+                addEdge({ drand(dnLim, upLim), i, static_cast<T1>(rand() % V), static_cast<color>(rand() % COLORS) });
     }
-    ~Graph() { /*Here the std::vector destructor is called for everything automatically*/ }
+    ~Graph() {
+        // Here the std::vector destructor is called for everything automatically
+    }
 
     // Add an edge in an undirected graph, return true if edge was added succesfully
     bool addEdge(edge e) {
@@ -97,10 +101,20 @@ public:
         return index;
     }
 
+    vector<edge>* createAdjacencyListFromSet(set<edge> s) {
+        vector<edge>* resAL = new vector<edge>[V];
+        for (typename set<edge>::iterator it = s.begin(); it != s.end(); it++) {
+            edge e = { it->weight, it->u, it->v, it->c };
+            resAL[it->u].push_back(e);
+            resAL[it->v].push_back(e);
+        }
+        return resAL;
+    }
+
     // Typical representation of Dijkstra's algorithm (breadth search)
-    T2** dijkstra(T1 source) {
-        source %= V;
-        T2* dist = new T2[V], * prev = new T2[V];
+    pair<T2*, T1*> dijkstra(T1 source, vector<edge>* al) {
+        T2* dist = new T2[V];
+        T1* prev = new T1[V];
         bool* visited = new bool[V];
         for (T1 i = 0; i < V; i++) {
             dist[i] = INF;
@@ -112,31 +126,36 @@ public:
         for (T1 i = 0; i < V - 1; i++) {
             T1 u = minDistance(dist, visited);
             visited[u] = true;
-            for (typename vector<edge>::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
+            for (typename vector<edge>::iterator it = al[u].begin(); it != al[u].end(); it++)
                 if (!visited[it->u] && dist[u] != INF && dist[it->u] > dist[u] + it->weight) {
                     dist[it->u] = dist[u] + it->weight;
                     prev[it->u] = u;
                 }
         }
-        return new T2 * [2]{ dist, prev };
+        return make_pair(dist, prev);
     }
 
     // Checks if a graph is fully connected
-    bool isFullyConnected() {
-        T2** arr = dijkstra(0);
-        for (T1 i = 0; i < V; i++) if (arr[1][i] < 0) return false;
+    bool isFullyConnected(vector<edge>* al) {
+        pair<T2*, T1*> p = dijkstra(0, al);
+        for (T1 i = 0; i < V; i++) if (p.second[i] < 0) return false;
         return true;
     }
 
     // Function to build minimum spanning forest (Kruskal's)
     Graph kruskalSTP(T2& weightSTP, bool red = true, bool green = true, bool blue = true) {
         set<edge> s;
-        if (red) s.insert(redEdges.begin(), redEdges.end());
-        if (green) s.insert(greenEdges.begin(), greenEdges.end());
-        if (blue) s.insert(blueEdges.begin(), blueEdges.end());
+        if (red && green && blue) s.insert(edges.begin(), edges.end());
+        else {
+            if (red) s.insert(redEdges.begin(), redEdges.end());
+            if (green) s.insert(greenEdges.begin(), greenEdges.end());
+            if (blue) s.insert(blueEdges.begin(), blueEdges.end());
+        }
 
-        // if the graph is not fully connected, then it cannot have a minimum spanning tree
-        if (!isFullyConnected()) return Graph();
+        // If the graph is not fully connected, then it cannot have a minimum spanning tree
+        if (red && green && blue){
+            if (!isFullyConnected(adjacencyList)) return Graph();
+        } else if (!isFullyConnected(createAdjacencyListFromSet(s))) return Graph();
         Graph stp(V);
         DisjointSets ds(V);
 
@@ -155,12 +174,12 @@ public:
 
 // The function of calculating the arithmetic mean of only positive numbers not equal
 // to infinity, taking into account their number in the array
-template <class T1, class T2> T2 calcAveragePositiveDistance(T2** arr, T1 size) {
-    if (size == 0) return T2(0);
+template <class T1, class T2> T2 calcAveragePositiveDistance(pair<T2*, T1*> p, T1 size) {
+    if (size == 0) return static_cast<T2>(0);
     T2 positiveSum = 0;
     T1 positiveCount = size;
     for (T1 i = 0; i < size; i++)
-        if (arr[1][i] >= 0 && arr[0][i] < INF) positiveSum += arr[0][i];
+        if (p.second[i] >= 0 && p.first[i] < INF) positiveSum += p.first[i];
         else positiveCount--;
     return positiveSum / positiveCount;
 }
