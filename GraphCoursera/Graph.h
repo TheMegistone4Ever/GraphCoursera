@@ -55,7 +55,7 @@ public:
             file >> V;
             while (!file.eof()) {
                 
-
+                //*********************************DO THIS!!!!!!****************************
 
             }
             file.close();
@@ -72,7 +72,7 @@ public:
         if (e.u == e.v) return false; // No loops in this graph
 
         // No dublicates in this graph
-        for (typename vector<edge>::iterator it = adjacencyList[e.u].begin(); it != adjacencyList[e.u].end(); it++)
+        for (auto it = adjacencyList[e.u].begin(); it != adjacencyList[e.u].end(); it++)
             if (it->u == e.v) return false;
 
         adjacencyList[e.u].push_back(e);
@@ -117,7 +117,7 @@ public:
 
     vector<edge>* createAdjacencyListFromSet(set<edge> s) {
         vector<edge>* resAL = new vector<edge>[V];
-        for (typename set<edge>::iterator it = s.begin(); it != s.end(); it++) {
+        for (auto it = s.begin(); it != s.end(); it++) {
             edge e = { it->weight, it->u, it->v, it->c };
             resAL[it->u].push_back(e);
             resAL[it->v].push_back(e);
@@ -140,7 +140,7 @@ public:
         for (T1 i = 0; i < V - 1; i++) {
             T1 u = minDistance(dist, visited);
             visited[u] = true;
-            for (typename vector<edge>::iterator it = al[u].begin(); it != al[u].end(); it++)
+            for (auto it = al[u].begin(); it != al[u].end(); it++)
                 if (!visited[it->u] && dist[u] != INF && dist[it->u] > dist[u] + it->weight) {
                     dist[it->u] = dist[u] + it->weight;
                     prev[it->u] = u;
@@ -173,7 +173,7 @@ public:
         Graph stp(V);
         DisjointSets ds(V);
 
-        for (typename set<edge>::iterator it = s.begin(); it != s.end(); it++) {
+        for (auto it = s.begin(); it != s.end(); it++) {
             T1 parentU = ds.find(it->u), parentV = ds.find(it->v);
             // Check if the selected edge is creating a cycle or not and, if not, add to MST
             if (parentU != parentV) {

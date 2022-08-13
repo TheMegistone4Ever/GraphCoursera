@@ -11,8 +11,8 @@ int main(int argc, char const* argv[]) {
     double dnLim; cout << "Input dnLim for random: "; cin >> dnLim;
     double upLim; cout << "Input upLim for random: "; cin >> upLim;
     //int source; cout << "Input source vertice (from 0 to " << V - 1 << "): "; cin >> source;
-    //Graph<int, double> graph(V, density, dnLim, upLim);
-    Graph<int, double> graph("graphfile.txt");
+    Graph<int, double> graph(V, density, dnLim, upLim);
+    //Graph<int, double> graph("graphfile.txt");
     graph.printAdjacencyList();
     //pair<T2*, T1*> dijkstraInfo = graph.dijkstra(source, );
     //double avgDist = calcAveragePositiveDistance(dijkstraInfo, V);
