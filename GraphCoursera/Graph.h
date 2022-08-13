@@ -1,19 +1,22 @@
 #pragma once
 #include <iostream>
-#include <list>
 #include <iomanip>
-#include <cctype>
+#include <vector>
+#include <set>
+#include <algorithm>
 const double INF = 1000000;
+const int COLORS = 3;
 using namespace std;
 inline double drand(double d, double u) { return d + (static_cast<double>(rand()) / RAND_MAX) * (u - d); }
+enum color {RED, GREEN, BLUE};
 
 template <class T1, class T2> class Graph {
     struct DisjointSets {
-        T1 n, * parent;
-        DisjointSets(T1 n) {
-            this->n = n;
-            parent = new T1[n + 1];
-            for (T1 i = 0; i <= n; i++) parent[i] = i;
+        T1 size, * parent;
+        DisjointSets(T1 size) {
+            this->size = size;
+            parent = new T1[size + 1];
+            for (T1 i = 0; i <= size; i++) parent[i] = i;
         }
 
         // Find and return the parent of a x node
@@ -23,32 +26,54 @@ template <class T1, class T2> class Graph {
         inline void merge(T1 x, T1 y) { parent[find(y)] = find(x); }
     };
 
+    struct edge {
+        T2 weight;
+        T1 u, v;
+        color c;
+        edge(T2 weight, T1 u, T1 v, color c) : weight(weight), u(u), v(v), c(c) {}
+        bool operator<(const edge& a) const { return weight < a.weight; }
+    };
 
     T1 V;
-    list<pair<T1, T2> >* adjacencyList;
-    list<pair<T2, pair<T1, T1> > > edges;
+    vector<pair<T1, T2> >* adjacencyList;
+    vector<edge> edges, redEdges, greenEdges, blueEdges; // (weight, u, v, color)
+
 public:
     // A constructor that builds a graph according to the given parameters of the number of
     // vertices, density and range
-    Graph(T1 V = 0, T2 density = 0, T2 dnLim = 0, T2 upLim = 0) : V(V), adjacencyList(new list<pair<T1, T2> >[V]) {
+    Graph(T1 V = 0, T2 density = 0, T2 dnLim = 0, T2 upLim = 0) : V(V), adjacencyList(new vector<pair<T1, T2> >[V]) {
         if (dnLim > upLim) swap(dnLim, upLim);
         for (T1 i = 0; i < V; i++)
             for (T1 e = 0; e < V * min(T2(1), max(T2(0), density)); e++)
-                addEdge(i, T1(rand() % V), drand(dnLim, upLim));
+                addEdge({ drand(dnLim, upLim), i, T1(rand() % V), static_cast<color>(rand() % COLORS) });
     }
     ~Graph() { /*Here the std::list destructor is called for everything automatically*/ }
 
     // Add an edge in an undirected graph, return true if edge was added succesfully
-    bool addEdge(T1 u, T1 v, T2 weight) {
-        if (u == v) return false; // No loops in this graph
+    bool addEdge(edge e) {
+        if (e.u == e.v) return false; // No loops in this graph
 
         // No dublicates in this graph
-        for (list<pair<T1, T2> >::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
-            if (it->first == v) return false;
+        for (typename vector<pair<T1, T2> >::iterator it = adjacencyList[e.u].begin(); it != adjacencyList[e.u].end(); it++)
+            if (it->first == e.v) return false;
 
-        adjacencyList[u].push_back(make_pair(v, weight));
-        adjacencyList[v].push_back(make_pair(u, weight));
-        edges.push_back(make_pair(weight, make_pair(u, v)));
+        adjacencyList[e.u].push_back(make_pair(e.v, e.weight));
+        adjacencyList[e.v].push_back(make_pair(e.u, e.weight));
+        edges.push_back(e);
+
+        switch (e.c) {
+        case RED:
+            redEdges.push_back(e);
+            break;
+        case GREEN:
+            greenEdges.push_back(e);
+            break;
+        case BLUE:
+            blueEdges.push_back(e);
+            break;
+        default:
+            cout << "ERROR COLOR: " << e.c << endl;
+        }
         return true;
     }
 
@@ -72,7 +97,7 @@ public:
         return index;
     }
 
-    // Typical representation of Dijkstra's algorithm (breadth)
+    // Typical representation of Dijkstra's algorithm (breadth search)
     T2** dijkstra(T1 source) {
         source %= V;
         T2* dist = new T2[V], * prev = new T2[V];
@@ -87,7 +112,7 @@ public:
         for (T1 i = 0; i < V - 1; i++) {
             T1 u = minDistance(dist, visited);
             visited[u] = true;
-            for (list<pair<T1, T2> >::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
+            for (typename vector<pair<T1, T2> >::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
                 if (!visited[it->first] && dist[u] != INF && dist[it->first] > dist[u] + it->second) {
                     dist[it->first] = dist[u] + it->second;
                     prev[it->first] = u;
@@ -104,23 +129,26 @@ public:
     }
 
     // Function to build minimum spanning forest (Kruskal's)
-    Graph kruskalSTP(T2& weightSTP) {
+    Graph kruskalSTP(T2& weightSTP, bool red = true, bool green = true, bool blue = true) {
+
+        set<edge> s;
+        if (red) s.insert(redEdges.begin(), redEdges.end());
+        if (green) s.insert(greenEdges.begin(), greenEdges.end());
+        if (blue) s.insert(blueEdges.begin(), blueEdges.end());
+
+        // if the graph is not fully connected, then it cannot have a minimum spanning tree
         if (!isFullyConnected()) return Graph();
         Graph stp(V);
         DisjointSets ds(V);
-        edges.sort(); // Iterate through all sorted edges
-        for (list<pair<T2, pair<T1, T1> > >::iterator it = edges.begin(); it != edges.end(); it++) {
-            T1 u = it->second.first, v = it->second.second, set_u = ds.find(u), set_v = ds.find(v);
 
-            // Check if the selected edge is creating a cycle or not
-            if (set_u != set_v) {
-                // Current edge will be in the MST
-                cout << u << " -MST- " << v << endl;
-                stp.addEdge(u, v, it->first);
-                weightSTP += it->first;
-                ds.merge(set_u, set_v);
+        for (typename set<edge>::iterator it = s.begin(); it != s.end(); it++) {
+            T1 parentU = ds.find(it->u), parentV = ds.find(it->v);
+            // Check if the selected edge is creating a cycle or not and, if not, add to MST
+            if (parentU != parentV) {
+                stp.addEdge({ it->weight, it->u, it->v, it->c });
+                weightSTP += it->weight;
+                ds.merge(parentU, parentV);
             }
-        
         }
         return stp;
     }

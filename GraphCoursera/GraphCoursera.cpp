@@ -12,7 +12,7 @@ int main(int argc, char const* argv[]) {
     double upLim; cout << "Input upLim for random: "; cin >> upLim;
     int source; cout << "Input source vertice (from 0 to " << V - 1 << "): "; cin >> source;
     Graph<int, double> graph(V, density, dnLim, upLim);
-    //graph.printAdjacencyList();
+    graph.printAdjacencyList();
     //double** dijkstraInfo = graph.dijkstra(source);
     //double avgDist = calcAveragePositiveDistance(dijkstraInfo, V);
 
@@ -27,10 +27,9 @@ int main(int argc, char const* argv[]) {
     cout << "GRAPH IS FULLY CONNECTED: " << boolalpha << graph.isFullyConnected() << endl;
 
     double weightSTP = 0;
-
-    Graph<int, double> stp = graph.kruskalSTP(weightSTP);
-    /*stp.printAdjacencyList();
-    cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightSTP << endl;*/
-
+    Graph<int, double> stp = graph.kruskalSTP(weightSTP, 0, 1, 1);
+    stp.printAdjacencyList();
+    cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightSTP << endl;
+    cout << "STP GRAPH IS FULLY CONNECTED: " << boolalpha << stp.isFullyConnected() << endl;
     return EXIT_SUCCESS;
 }
