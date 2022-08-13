@@ -35,30 +35,30 @@ template <class T1, class T2> class Graph {
     };
 
     T1 V;
-    vector<pair<T1, T2> >* adjacencyList;
+    vector<edge>* adjacencyList;
     vector<edge> edges, redEdges, greenEdges, blueEdges; // (weight, u, v, color)
 
 public:
     // A constructor that builds a graph according to the given parameters of the number of
     // vertices, density and range
-    Graph(T1 V = 0, T2 density = 0, T2 dnLim = 0, T2 upLim = 0) : V(V), adjacencyList(new vector<pair<T1, T2> >[V]) {
+    Graph(T1 V = 0, T2 density = 0, T2 dnLim = 0, T2 upLim = 0) : V(V), adjacencyList(new vector<edge>[V]) {
         if (dnLim > upLim) swap(dnLim, upLim);
         for (T1 i = 0; i < V; i++)
             for (T1 e = 0; e < V * min(T2(1), max(T2(0), density)); e++)
                 addEdge({ drand(dnLim, upLim), i, T1(rand() % V), static_cast<color>(rand() % COLORS) });
     }
-    ~Graph() { /*Here the std::list destructor is called for everything automatically*/ }
+    ~Graph() { /*Here the std::vector destructor is called for everything automatically*/ }
 
     // Add an edge in an undirected graph, return true if edge was added succesfully
     bool addEdge(edge e) {
         if (e.u == e.v) return false; // No loops in this graph
 
         // No dublicates in this graph
-        for (typename vector<pair<T1, T2> >::iterator it = adjacencyList[e.u].begin(); it != adjacencyList[e.u].end(); it++)
-            if (it->first == e.v) return false;
+        for (typename vector<edge>::iterator it = adjacencyList[e.u].begin(); it != adjacencyList[e.u].end(); it++)
+            if (it->u == e.v) return false;
 
-        adjacencyList[e.u].push_back(make_pair(e.v, e.weight));
-        adjacencyList[e.v].push_back(make_pair(e.u, e.weight));
+        adjacencyList[e.u].push_back(e);
+        adjacencyList[e.v].push_back(e);
         edges.push_back(e);
 
         switch (e.c) {
@@ -82,8 +82,8 @@ public:
         T1 w = static_cast<T1>(log10(V)) + 1;
         for (T1 v = 0; v < V; v++) {
             cout << "Vertex " << setw(w) << v << ':';
-            for (const pair<T1, T2>& p : adjacencyList[v])
-                cout << " -> " << setw(w) << p.first << ":w=" << fixed << setprecision(3) << p.second;
+            for (const edge& p : adjacencyList[v])
+                cout << " -> " << setw(w) << p.u << ":w=" << fixed << setprecision(3) << p.weight << "c=" << p.c;
             cout << endl;
         }
     }
@@ -112,10 +112,10 @@ public:
         for (T1 i = 0; i < V - 1; i++) {
             T1 u = minDistance(dist, visited);
             visited[u] = true;
-            for (typename vector<pair<T1, T2> >::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
-                if (!visited[it->first] && dist[u] != INF && dist[it->first] > dist[u] + it->second) {
-                    dist[it->first] = dist[u] + it->second;
-                    prev[it->first] = u;
+            for (typename vector<edge>::iterator it = adjacencyList[u].begin(); it != adjacencyList[u].end(); it++)
+                if (!visited[it->u] && dist[u] != INF && dist[it->u] > dist[u] + it->weight) {
+                    dist[it->u] = dist[u] + it->weight;
+                    prev[it->u] = u;
                 }
         }
         return new T2 * [2]{ dist, prev };
@@ -130,7 +130,6 @@ public:
 
     // Function to build minimum spanning forest (Kruskal's)
     Graph kruskalSTP(T2& weightSTP, bool red = true, bool green = true, bool blue = true) {
-
         set<edge> s;
         if (red) s.insert(redEdges.begin(), redEdges.end());
         if (green) s.insert(greenEdges.begin(), greenEdges.end());
