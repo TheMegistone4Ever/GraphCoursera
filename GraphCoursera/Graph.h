@@ -4,14 +4,14 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <fstream>
 const double INF = 1000000;
 const int COLORS = 3;
 using namespace std;
 inline double drand(double d, double u) { return d + (static_cast<double>(rand()) / RAND_MAX) * (u - d); }
+enum color { RED, GREEN, BLUE };
 
 template <class T1, class T2> class Graph {
-    enum color { RED, GREEN, BLUE };
-    
     struct DisjointSets {
         T1 size, * parent;
         DisjointSets(T1 size) {
@@ -48,6 +48,20 @@ public:
         for (T1 i = 0; i < V; i++)
             for (T1 e = 0; e < V * min(static_cast<T2>(1), max(static_cast<T2>(0), density)); e++)
                 addEdge({ drand(dnLim, upLim), i, static_cast<T1>(rand() % V), static_cast<color>(rand() % COLORS) });
+    }
+    Graph(const char* filename) {
+        ifstream file(filename);
+        if (file) {
+            file >> V;
+            while (!file.eof()) {
+                
+
+
+            }
+            file.close();
+        }
+        else cerr << "Error: file could not be opened" << endl;
+
     }
     ~Graph() {
         // Here the std::vector destructor is called for everything automatically
