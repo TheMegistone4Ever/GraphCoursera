@@ -10,7 +10,7 @@ int main(int argc, char const* argv[]) {
     double density; cout << "Input density (from 0 to 1): "; cin >> density;
     double dnLim; cout << "Input dnLim for random: "; cin >> dnLim;
     double upLim; cout << "Input upLim for random: "; cin >> upLim;
-    int source; cout << "Input source vertice (from 0 to " << V - 1 << "): "; cin >> source;
+    //int source; cout << "Input source vertice (from 0 to " << V - 1 << "): "; cin >> source;
     Graph<int, double> graph(V, density, dnLim, upLim);
     graph.printAdjacencyList();
     //pair<T2*, T1*> dijkstraInfo = graph.dijkstra(source, );
@@ -23,13 +23,12 @@ int main(int argc, char const* argv[]) {
     //    << "\tV Prev:\t" << dijkstraInfo.second[i] << endl;
 
     //cout << "AVERAGE MIN POSITIVE DISTANCE: " << setprecision(5) << avgDist << endl;
-
     cout << "GRAPH IS FULLY CONNECTED: " << boolalpha << graph.isFullyConnected(graph.getAdjacencyList()) << endl;
 
-    double weightSTP = 0;
-    Graph<int, double> stp = graph.kruskalSTP(weightSTP, 0, 1, 1);
+    double weightMST = 0;
+    Graph<int, double> stp = graph.kruskalMST(weightMST, 0, 1, 1);
     stp.printAdjacencyList();
-    cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightSTP << endl;
+    cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightMST << endl;
     cout << "STP GRAPH IS FULLY CONNECTED: " << boolalpha << stp.isFullyConnected(stp.getAdjacencyList()) << endl;
     return EXIT_SUCCESS;
 }

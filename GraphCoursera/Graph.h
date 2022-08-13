@@ -143,7 +143,7 @@ public:
     }
 
     // Function to build minimum spanning forest (Kruskal's)
-    Graph kruskalSTP(T2& weightSTP, bool red = true, bool green = true, bool blue = true) {
+    Graph kruskalMST(T2& weightMST, bool red = true, bool green = true, bool blue = true) {
         set<edge> s;
         if (red && green && blue) s.insert(edges.begin(), edges.end());
         else {
@@ -164,7 +164,7 @@ public:
             // Check if the selected edge is creating a cycle or not and, if not, add to MST
             if (parentU != parentV) {
                 stp.addEdge({ it->weight, it->u, it->v, it->c });
-                weightSTP += it->weight;
+                weightMST += it->weight;
                 ds.merge(parentU, parentV);
             }
         }
