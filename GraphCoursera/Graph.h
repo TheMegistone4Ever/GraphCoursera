@@ -130,7 +130,8 @@ public:
     }
 
     // Typical representation of Dijkstra's algorithm (breadth search)
-    pair<T2*, T1*> dijkstra(T1 source, vector<edge>* al) {
+    pair<T2*, T1*> dijkstra(T1 source, vector<edge>* al = nullptr) {
+        if (al == nullptr) al = adjacencyList;
         T2* dist = new T2[V];
         T1* prev = new T1[V];
         bool* visited = new bool[V];
@@ -149,7 +150,8 @@ public:
     }
 
     // Checks if a graph is fully connected
-    bool isFullyConnected(vector<edge>* al) {
+    bool isFullyConnected(vector<edge>* al = nullptr) {
+        if (al == nullptr) al = adjacencyList;
         pair<T2*, T1*> p = dijkstra(0, al);
         for (T1 i = 0; i < V; i++) if (p.second[i] < 0) return false;
         return true;
@@ -186,7 +188,7 @@ public:
 // The function of calculating the arithmetic mean of only positive numbers not equal
 // to infinity, taking into account their number in the array
 template <class T1, class T2> T2 calcAveragePositiveDistance(pair<T2*, T1*> p, T1 size) {
-    if (size == 0) return static_cast<T2>(0);
+    if (size == 0) return 0;
     T2 positiveSum = 0;
     T1 positiveCount = size;
     for (T1 i = 0; i < size; i++)

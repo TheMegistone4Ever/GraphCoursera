@@ -22,11 +22,12 @@ int main(int argc, char const* argv[]) {
     //cout << "AVERAGE MIN POSITIVE DISTANCE: " << setprecision(5) << avgDist << endl;
     Graph<int, double> graph("graphfile.txt");
     graph.printAdjacencyList();
-    cout << "GRAPH IS FULLY CONNECTED: " << boolalpha << graph.isFullyConnected(graph.getAdjacencyList()) << endl;
+    cout << "GRAPH IS FULLY CONNECTED: " << boolalpha << graph.isFullyConnected() << endl;
     double weightMST = 0;
     Graph<int, double> stp = graph.kruskalMST(weightMST, 0, 1, 1);
+    cout << "MST KRUSKAL Adjacency List:" << endl;
     stp.printAdjacencyList();
-    cout << "WEIGHT OF STP: " << fixed << setprecision(3) << weightMST << endl;
-    cout << "STP GRAPH IS FULLY CONNECTED: " << boolalpha << stp.isFullyConnected(stp.getAdjacencyList()) << endl;
+    cout << "WEIGHT OF MST: " << fixed << setprecision(3) << weightMST << endl;
+    cout << "MST GRAPH IS FULLY CONNECTED: " << boolalpha << stp.isFullyConnected() << endl;
     return EXIT_SUCCESS;
 }
