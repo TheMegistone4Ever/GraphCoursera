@@ -2,10 +2,9 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <set>
 #include <algorithm>
 #include <fstream>
-const double INF = 1000000;
+const double INF = 99999;
 const int COLORS = 3;
 using namespace std;
 inline double drand(double d, double u) { return d + (static_cast<double>(rand()) / RAND_MAX) * (u - d); }
@@ -19,6 +18,7 @@ template <class T1, class T2> class Graph {
             parent = new T1[size + 1];
             for (T1 i = 0; i <= size; i++) parent[i] = i;
         }
+        ~DisjointSets() { delete[] parent; }
 
         // Find and return the parent of a x node
         inline T1 find(T1 x) { return parent[x] != x ? find(parent[x]) : x; }
@@ -52,16 +52,19 @@ public:
     Graph(const char* filename) {
         ifstream file(filename);
         if (file) {
-            file >> V;
-            while (!file.eof()) {
-                
-                //*********************************DO THIS!!!!!!****************************
-
+            istream_iterator<int> start(file), end;
+            vector<int> data(start, end);
+            V = *data.begin();
+            adjacencyList = new vector<edge>[V];
+            for (auto it = next(data.begin()); it != data.end(); it = next(it)) {
+                T1 u = *it;
+                T1 v = *(it = next(it));
+                T2 w = *(it = next(it));
+                addEdge({ w, u, v, BLUE });
             }
+            cout << "File was readed succesfully from file: " << filename << endl;
             file.close();
-        }
-        else cerr << "Error: file could not be opened" << endl;
-
+        } else cerr << "Error: file could not be opened!" << endl;
     }
     ~Graph() {
         // Here the std::vector destructor is called for everything automatically
@@ -90,7 +93,7 @@ public:
             blueEdges.push_back(e);
             break;
         default:
-            cout << "ERROR COLOR: " << e.c << endl;
+            cerr << "ERROR COLOR: " << e.c << endl;
         }
         return true;
     }
@@ -100,22 +103,14 @@ public:
         T1 w = static_cast<T1>(log10(V)) + 1;
         for (T1 v = 0; v < V; v++) {
             cout << "Vertex " << setw(w) << v << ':';
-            for (const edge& p : adjacencyList[v])
-                cout << " -> " << setw(w) << p.u << ":w=" << fixed << setprecision(3) << p.weight << "c=" << p.c;
+            for (const edge& e : adjacencyList[v])
+                cout << " -> " << setw(w) << e.u << ":w=" << fixed << setprecision(3) << e.weight << "c=" << e.c;
             cout << endl;
         }
     }
 
-    // Minimum distance among unvisited vertices
-    T1 minDistance(T2* dist, bool* visited) {
-        T2 min = INF;
-        T1 index = 0;
-        for (T1 i = 0; i < V; i++)
-            if (dist[i] < min && !visited[i]) { min = dist[i]; index = i; }
-        return index;
-    }
-
-    vector<edge>* createAdjacencyListFromSet(set<edge> s) {
+    // Creating adjacency list from set
+    vector<edge>* createAdjacencyListFromVector(vector<edge> s) {
         vector<edge>* resAL = new vector<edge>[V];
         for (auto it = s.begin(); it != s.end(); it++) {
             edge e = { it->weight, it->u, it->v, it->c };
@@ -125,25 +120,29 @@ public:
         return resAL;
     }
 
+    // Minimum distance among unvisited vertices
+    T1 minDistance(T2* dist, bool* visited) {
+        T2 min = INF;
+        T1 index = 0;
+        for (T1 i = 0; i < V; i++)
+            if (!visited[i] && dist[i] < min) min = dist[i], index = i;
+        return index;
+    }
+
     // Typical representation of Dijkstra's algorithm (breadth search)
     pair<T2*, T1*> dijkstra(T1 source, vector<edge>* al) {
         T2* dist = new T2[V];
         T1* prev = new T1[V];
         bool* visited = new bool[V];
-        for (T1 i = 0; i < V; i++) {
-            dist[i] = INF;
-            prev[i] = -1;
-            visited[i] = false;
-        }
-        dist[source] = 0;
-        prev[source] = source;
+        for (T1 i = 0; i < V; i++) dist[i] = INF, prev[i] = -1, visited[i] = false;
+        dist[source] = 0, prev[source] = source;
         for (T1 i = 0; i < V - 1; i++) {
-            T1 u = minDistance(dist, visited);
-            visited[u] = true;
-            for (auto it = al[u].begin(); it != al[u].end(); it++)
-                if (!visited[it->u] && dist[u] != INF && dist[it->u] > dist[u] + it->weight) {
-                    dist[it->u] = dist[u] + it->weight;
-                    prev[it->u] = u;
+            T1 nearest = minDistance(dist, visited);
+            visited[nearest] = true;
+            for (auto adj = al[nearest].begin(); adj != al[nearest].end(); adj++)
+                if (!visited[adj->v] && dist[nearest] != INF && dist[nearest] + adj->weight < dist[adj->v]) {
+                    dist[adj->v] = dist[nearest] + adj->weight;
+                    prev[adj->v] = nearest;
                 }
         }
         return make_pair(dist, prev);
@@ -158,21 +157,19 @@ public:
 
     // Function to build minimum spanning forest (Kruskal's)
     Graph kruskalMST(T2& weightMST, bool red = true, bool green = true, bool blue = true) {
-        set<edge> s;
-        if (red && green && blue) s.insert(edges.begin(), edges.end());
+        vector<edge> s;
+        if (red && green && blue) s.insert(s.end(), edges.begin(), edges.end());
         else {
-            if (red) s.insert(redEdges.begin(), redEdges.end());
-            if (green) s.insert(greenEdges.begin(), greenEdges.end());
-            if (blue) s.insert(blueEdges.begin(), blueEdges.end());
+            if (red) s.insert(s.end(), redEdges.begin(), redEdges.end());
+            if (green) s.insert(s.end(), greenEdges.begin(), greenEdges.end());
+            if (blue) s.insert(s.end(), blueEdges.begin(), blueEdges.end());
         }
-
         // If the graph is not fully connected, then it cannot have a minimum spanning tree
-        if (red && green && blue){
-            if (!isFullyConnected(adjacencyList)) return Graph();
-        } else if (!isFullyConnected(createAdjacencyListFromSet(s))) return Graph();
+        if (red && green && blue) { if (!isFullyConnected(adjacencyList)) return Graph();
+        } else if (!isFullyConnected(createAdjacencyListFromVector(s))) return Graph();
+        sort(s.begin(), s.end());
         Graph stp(V);
         DisjointSets ds(V);
-
         for (auto it = s.begin(); it != s.end(); it++) {
             T1 parentU = ds.find(it->u), parentV = ds.find(it->v);
             // Check if the selected edge is creating a cycle or not and, if not, add to MST
