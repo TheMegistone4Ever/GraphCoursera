@@ -1,5 +1,5 @@
 ﻿// Graph class from Peer-graded Assignment: Homework 2: Implement Dijkstra's Algorithm,
-// Task: 
+// Task: Peer-graded Assignment Homework 3 Compute the minimum spanning tree for an inputted graph
 // C++ For C Programmers, Part A, Week 4,
 // by Nickita Kyselyov, NTUU KPI nb. Igor Sikorsky, 2nd grade, FICT, IS-13,
 // 11.08.2022

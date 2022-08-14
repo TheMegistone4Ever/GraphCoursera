@@ -28,15 +28,15 @@ template <class T1, class T2> class Graph {
     };
 
     struct edge {
-        T2 weight;
+        T2 w;
         T1 u, v;
         color c;
-        edge(T2 weight, T1 u, T1 v, color c) : weight(weight), u(u), v(v), c(c) {}
-        bool operator<(const edge& a) const { return weight < a.weight; }
+        edge(T2 w, T1 u, T1 v, color c) : w(w), u(u), v(v), c(c) {}
+        bool operator<(const edge& a) const { return w < a.w; }
     };
 
     T1 V;
-    vector<edge>* adjacencyList, edges, redEdges, greenEdges, blueEdges; // (weight, u, v, color)
+    vector<edge>* adjacencyList, edges, redEdges, greenEdges, blueEdges;
 
 public:
     vector<edge>* getAdjacencyList() { return adjacencyList; }
@@ -73,15 +73,10 @@ public:
     // Add an edge in an undirected graph, return true if edge was added succesfully
     bool addEdge(edge e) {
         if (e.u == e.v) return false; // No loops in this graph
-
-        // No dublicates in this graph
-        for (auto it = adjacencyList[e.u].begin(); it != adjacencyList[e.u].end(); it++)
-            if (it->u == e.v) return false;
-
+        for (auto way : adjacencyList[e.u]) if (way.u == e.v) return false; // No dublicates in this graph
         adjacencyList[e.u].push_back(e);
         adjacencyList[e.v].push_back(e);
         edges.push_back(e);
-
         switch (e.c) {
         case RED:
             redEdges.push_back(e);
@@ -103,19 +98,18 @@ public:
         T1 w = static_cast<T1>(log10(V)) + 1;
         for (T1 v = 0; v < V; v++) {
             cout << "Vertex " << setw(w) << v << ':';
-            for (const edge& e : adjacencyList[v])
-                cout << " -> " << setw(w) << e.u << ":w=" << fixed << setprecision(3) << e.weight << "c=" << e.c;
+            for (auto &e : adjacencyList[v])
+                cout << " -> " << setw(w) << e.u << ":w=" << fixed << setprecision(3) << e.w << "c=" << e.c;
             cout << endl;
         }
     }
 
     // Creating adjacency list from set
-    vector<edge>* createAdjacencyListFromVector(vector<edge> s) {
+    vector<edge>* createALFromVector(vector<edge> v) {
         vector<edge>* resAL = new vector<edge>[V];
-        for (auto it = s.begin(); it != s.end(); it++) {
-            edge e = { it->weight, it->u, it->v, it->c };
-            resAL[it->u].push_back(e);
-            resAL[it->v].push_back(e);
+        for (edge e : v) {
+            resAL[e.u].push_back(e);
+            resAL[e.v].push_back(e);
         }
         return resAL;
     }
@@ -140,11 +134,9 @@ public:
         for (T1 i = 0; i < V - 1; i++) {
             T1 nearest = minDistance(dist, visited);
             visited[nearest] = true;
-            for (auto adj = al[nearest].begin(); adj != al[nearest].end(); adj++)
-                if (!visited[adj->v] && dist[nearest] != INF && dist[nearest] + adj->weight < dist[adj->v]) {
-                    dist[adj->v] = dist[nearest] + adj->weight;
-                    prev[adj->v] = nearest;
-                }
+            for (edge adj : al[nearest])
+                if (!visited[adj.v] && dist[nearest] != INF && dist[nearest] + adj.w < dist[adj.v])
+                    prev[adj.v] = nearest, dist[adj.v] = dist[nearest] + adj.w;
         }
         return make_pair(dist, prev);
     }
@@ -158,26 +150,25 @@ public:
     }
 
     // Function to build minimum spanning forest (Kruskal's)
-    Graph kruskalMST(T2& weightMST, bool red = true, bool green = true, bool blue = true) {
-        vector<edge> s;
-        if (red && green && blue) s.insert(s.end(), edges.begin(), edges.end());
+    Graph kruskalMST(T2& weightMST, bool r = true, bool g = true, bool b = true) {
+        vector<edge> filter;
+        if (r && g && b) filter.insert(filter.end(), edges.begin(), edges.end());
         else {
-            if (red) s.insert(s.end(), redEdges.begin(), redEdges.end());
-            if (green) s.insert(s.end(), greenEdges.begin(), greenEdges.end());
-            if (blue) s.insert(s.end(), blueEdges.begin(), blueEdges.end());
+            if (r) filter.insert(filter.end(), redEdges.begin(), redEdges.end());
+            if (g) filter.insert(filter.end(), greenEdges.begin(), greenEdges.end());
+            if (b) filter.insert(filter.end(), blueEdges.begin(), blueEdges.end());
         }
         // If the graph is not fully connected, then it cannot have a minimum spanning tree
-        if (red && green && blue) { if (!isFullyConnected(adjacencyList)) return Graph();
-        } else if (!isFullyConnected(createAdjacencyListFromVector(s))) return Graph();
-        sort(s.begin(), s.end());
+        if (r && g && b && !isFullyConnected() || !isFullyConnected(createALFromVector(filter))) return Graph();
+        sort(filter.begin(), filter.end());
         Graph stp(V);
         DisjointSets ds(V);
-        for (auto it = s.begin(); it != s.end(); it++) {
-            T1 parentU = ds.find(it->u), parentV = ds.find(it->v);
+        for (edge e : filter) {
+            T1 parentU = ds.find(e.u), parentV = ds.find(e.v);
             // Check if the selected edge is creating a cycle or not and, if not, add to MST
             if (parentU != parentV) {
-                stp.addEdge({ it->weight, it->u, it->v, it->c });
-                weightMST += it->weight;
+                stp.addEdge(e);
+                weightMST += e.w;
                 ds.merge(parentU, parentV);
             }
         }
