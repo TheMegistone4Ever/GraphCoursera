@@ -8,7 +8,7 @@ const double INF = 99999;
 const int COLORS = 3;
 using namespace std;
 inline double drand(double d, double u) { return d + (static_cast<double>(rand()) / RAND_MAX) * (u - d); }
-enum color { RED, GREEN, BLUE };
+enum class color { RED, GREEN, BLUE };
 
 template <class T1, class T2> class Graph {
     struct DisjointSets {
@@ -60,11 +60,16 @@ public:
                 T1 u = *it;
                 T1 v = *(it = next(it));
                 T2 w = *(it = next(it));
-                addEdge({ w, u, v, BLUE });
+                addEdge({ w, u, v, color::BLUE });
             }
             cout << "File was readed succesfully from file: " << filename << endl;
             file.close();
-        } else cerr << "Error: file could not be opened!" << endl;
+        }
+        else {
+            V = 0;
+            adjacencyList = nullptr;
+            cerr << "Error: file could not be opened!" << endl;
+        }
     }
     ~Graph() {
         // Here the std::vector destructor is called for everything automatically
@@ -78,17 +83,17 @@ public:
         adjacencyList[e.v].push_back(e);
         edges.push_back(e);
         switch (e.c) {
-        case RED:
+        case color::RED:
             redEdges.push_back(e);
             break;
-        case GREEN:
+        case color::GREEN:
             greenEdges.push_back(e);
             break;
-        case BLUE:
+        case color::BLUE:
             blueEdges.push_back(e);
             break;
         default:
-            cerr << "ERROR COLOR: " << e.c << endl;
+            cerr << "ERROR COLOR: " << static_cast<int>(e.c) << endl;
         }
         return true;
     }
@@ -99,7 +104,7 @@ public:
         for (T1 v = 0; v < V; v++) {
             cout << "Vertex " << setw(w) << v << ':';
             for (auto &e : adjacencyList[v])
-                cout << " -> " << setw(w) << e.u << ":w=" << fixed << setprecision(3) << e.w << "c=" << e.c;
+                cout << " -> " << setw(w) << e.u << ":w=" << fixed << setprecision(3) << e.w << "c=" << static_cast<int>(e.c);
             cout << endl;
         }
     }
