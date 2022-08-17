@@ -4,11 +4,11 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
-const double INF = 99999;
+const double INF = 9999;
 const int COLORS = 3;
 using namespace std;
 inline double drand(double d, double u) { return d + (static_cast<double>(rand()) / RAND_MAX) * (u - d); }
-enum class color { RED, GREEN, BLUE };
+enum class color { GREEN, BLUE, RED };
 
 template <class T1, class T2> class Graph {
     struct DisjointSets {
@@ -47,7 +47,7 @@ public:
         if (dnLim > upLim) swap(dnLim, upLim);
         for (T1 i = 0; i < V; i++)
             for (T1 e = 0; e < V * min(static_cast<T2>(1), max(static_cast<T2>(0), density)); e++)
-                addEdge({ drand(dnLim, upLim), i, static_cast<T1>(rand() % V), static_cast<color>(rand() % COLORS) });
+                addEdge({ static_cast<T1>(drand(dnLim, upLim)), i, static_cast<T1>(rand() % V), static_cast<color>(rand() % COLORS) });
     }
     Graph(const char* filename) {
         ifstream file(filename);
@@ -78,7 +78,7 @@ public:
     // Add an edge in an undirected graph, return true if edge was added succesfully
     bool addEdge(edge e) {
         if (e.u == e.v) return false; // No loops in this graph
-        for (auto way : adjacencyList[e.u]) if (way.u == e.v) return false; // No dublicates in this graph
+        //for (const edge& way : adjacencyList[e.u]) if (way.u == e.v) return false; // No dublicates in this graph
         adjacencyList[e.u].push_back(e);
         adjacencyList[e.v].push_back(e);
         edges.push_back(e);
@@ -99,11 +99,12 @@ public:
     }
 
     // Print the adjacency list representation of graph
-    void printAdjacencyList() {
+    void printAdjacencyList(vector<edge>* al = nullptr) {
+        if (al == nullptr) al = adjacencyList;
         T1 w = static_cast<T1>(log10(V)) + 1;
         for (T1 v = 0; v < V; v++) {
             cout << "Vertex " << setw(w) << v << ':';
-            for (auto &e : adjacencyList[v])
+            for (auto& e : al[v])
                 cout << " -> " << setw(w) << e.u << ":w=" << fixed << setprecision(3) << e.w << "c=" << static_cast<int>(e.c);
             cout << endl;
         }
@@ -129,8 +130,16 @@ public:
     }
 
     // Typical representation of Dijkstra's algorithm (breadth search)
-    pair<T2*, T1*> dijkstra(T1 source, vector<edge>* al = nullptr) {
-        if (al == nullptr) al = adjacencyList;
+    pair<T2*, T1*> dijkstra(T1 source, bool r = true, bool g = true, bool b = true) {
+        vector<edge> filter;
+        vector<edge>* al;
+        if (r && g && b) al = adjacencyList;
+        else {
+            if (r) filter.insert(filter.end(), redEdges.begin(), redEdges.end());
+            if (g) filter.insert(filter.end(), greenEdges.begin(), greenEdges.end());
+            if (b) filter.insert(filter.end(), blueEdges.begin(), blueEdges.end());
+            al = createALFromVector(filter);
+        }
         T2* dist = new T2[V];
         T1* prev = new T1[V];
         bool* visited = new bool[V];
