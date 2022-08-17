@@ -78,7 +78,7 @@ public:
     // Add an edge in an undirected graph, return true if edge was added succesfully
     bool addEdge(edge e) {
         if (e.u == e.v) return false; // No loops in this graph
-        //for (const edge& way : adjacencyList[e.u]) if (way.u == e.v) return false; // No dublicates in this graph
+        for (const edge& s : adjacencyList[e.u]) if (s.v == e.v) return false; // No dublicates in this graph
         adjacencyList[e.u].push_back(e);
         adjacencyList[e.v].push_back(e);
         edges.push_back(e);
