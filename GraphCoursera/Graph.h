@@ -122,7 +122,7 @@ public:
 
     // Minimum distance among unvisited vertices
     T1 minDistance(T2* dist, bool* visited) {
-        T2 min = INF;
+        T2 min = static_cast<T2>(INF);
         T1 index = 0;
         for (T1 i = 0; i < V; i++)
             if (!visited[i] && dist[i] < min) min = dist[i], index = i;
